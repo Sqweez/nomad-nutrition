@@ -1,0 +1,45 @@
+.outlined-home-button-link {
+    @apply relative text-sm lg:text-lg shadow-xl text-center py-4 lg:py-5 px-[120px] text-white uppercase mt-[51px] inline-block border border-solid border-white;
+}
+
+.outlined-home-button-link::after {
+    display: block;
+    position: absolute;
+    bottom: -11px;
+    left: 0;
+    content: "";
+    width: 100%;
+    height: 19px;
+    background-color: transparent;
+    filter: blur(20px);
+    z-index: 1;
+    border-radius: 20px;
+    transition-duration: .3s;
+}
+
+.outlined-home-button-link:hover::after {
+    background: #E63534;
+}
+
+.button-hover {
+    position: relative;
+}
+
+.button-hover::after {
+    display: block;
+    position: absolute;
+    bottom: -11px;
+    left: 0;
+    content: "";
+    width: 100%;
+    height: 19px;
+    background-color: transparent;
+    filter: blur(20px);
+    z-index: 1;
+    border-radius: 20px;
+    transition-duration: .3s;
+}
+
+.button-hover:hover::after {
+    background: #E63534;
+}
