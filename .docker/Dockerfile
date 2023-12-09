@@ -26,7 +26,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # copy over build files from builder step
-COPY --from=builder /var/www/vhosts/nomad-nutrition.ariesdev.kz/.output/ ./
+COPY --from=builder /app/.output /app/.output
 
 
 # expose the host and port 3000 to the server
