@@ -26,12 +26,12 @@ FROM node:18-alpine
 WORKDIR /app
 
 # copy over build files from builder step
-COPY --from=builder /app/.output /app/.output
+COPY --from=builder /var/www/vhosts/nomad-nutrition.ariesdev.kz/.output/ ./
 
 
 # expose the host and port 3000 to the server
 ENV HOST 0.0.0.0
-EXPOSE 3000
+EXPOSE 8080
 
 # run the build project with node
 ENTRYPOINT ["node", ".output/server/index.mjs"]
