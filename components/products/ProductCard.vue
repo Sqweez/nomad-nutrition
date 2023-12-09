@@ -1,31 +1,31 @@
 <template>
-  <nuxt-link to="/products/1" class="product__card flex flex-col items-center justify-between px-3 py-3 gap-y-2.5 cursor-pointer relative">
+  <nuxt-link :to="`/products/${url}`" class="product__card flex flex-col items-center justify-between px-3 py-3 gap-y-2.5 cursor-pointer relative">
     <div class="absolute inset-x-0 top-0 flex">
       <div class="py-0.5 px-1.5 bg-accent">
         <span class="text-white uppercase font-medium text-[10px] lg:text-sm">Новинка</span>
       </div>
-      <div class="py-0.5 px-1.5 bg-gold">
+      <div v-if="hasStock" class="py-0.5 px-1.5 bg-gold">
         <span class="text-white uppercase font-medium text-[10px] lg:text-sm">Акция</span>
       </div>
     </div>
     <div class="flex flex-col items-center">
       <div class="product__card--image overflow-hidden">
         <img
-            src="~/assets/images/products/sample_product.png"
-            alt="Sample Product"
+            :src="product.product_image"
+            :alt="productNameFull"
             class="w-full h-full object-contain"
         >
       </div>
       <span class="text-white text-center uppercase text-sm lg:text-lg font-medium">
-        Thermo Rush
+        {{ productNameFull }}
       </span>
       <span class="text-[#757575] text-center py-1 text-[12px] lg:text-base">
-        Жиросжигатели и термогенетики
+        {{ product.subcategory }}
       </span>
     </div>
     <div class="justify-between flex items-center gap-x-2 w-full px-4 lg:px-[25px]">
       <span class="text-white text-sm lg:text-lg font-medium flex-shrink-0">
-        12.990 тг
+        {{ product.stock_price }} тг
       </span>
       <button class="w-[47px] h-[29px] lg:w-[68px] lg:h-[43px] border border-white border-solid py-[5px] px-[10px] lg:py-2 lg:px-4 cart__button flex-shrink-0 relative">
         <svg width="45" height="39" viewBox="0 0 45 39" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full object-contain">
@@ -36,25 +36,55 @@
           <path fill-rule="evenodd" clip-rule="evenodd" d="M13.7109 22.5879V30.1465C13.7109 30.7907 14.5608 31.6406 15.2051 31.6406H15.7324C16.3767 31.6406 17.2266 30.7907 17.2266 30.1465V22.5879C17.2266 21.9436 16.3767 21.0938 15.7324 21.0938H15.2051C14.5608 21.0938 13.7109 21.9436 13.7109 22.5879Z" fill="#E63534"/>
           <path fill-rule="evenodd" clip-rule="evenodd" d="M20.7422 22.5879V30.1465C20.7422 30.7907 21.5921 31.6406 22.2363 31.6406H22.7637C23.4079 31.6406 24.2578 30.7907 24.2578 30.1465V22.5879C24.2578 21.9436 23.4079 21.0938 22.7637 21.0938H22.2363C21.5921 21.0938 20.7422 21.9436 20.7422 22.5879Z" fill="#E63534"/>
         </svg>
-
       </button>
     </div>
   </nuxt-link>
 </template>
 
-<script>
-export default {
-  props: {
-    product: {
-      type: Object,
-      required: true,
-    }
-  },
-  data: () => ({
-  }),
-  methods: {},
-  computed: {}
-}
+<script setup>
+import {toReactive} from '@vueuse/core';
+
+const props = defineProps({
+  product: {
+    type: Object,
+  }
+})
+
+/**
+ * @typedef {Object} Product
+ * @property {number} product_id - Уникальный идентификатор продукта.
+ * @property {boolean} is_hit - Флаг, указывающий, является ли продукт хитом продаж.
+ * @property {string} product_name - Название продукта.
+ * @property {string} subcategory - Название подкатегории, к которой относится продукт.
+ * @property {number} subcategory_id - Уникальный идентификатор подкатегории продукта.
+ * @property {number} product_price - Цена продукта в тенге.
+ * @property {string} product_image - URL изображения продукта.
+ * @property {Array} attributes - Массив атрибутов продукта.
+ * @property {string} product_name_slug - URL-френдли название продукта.
+ * @property {boolean} in_selected_city - Флаг, указывающий, доступен ли продукт в выбранном городе.
+ * @property {boolean} in_other_city - Флаг, указывающий, доступен ли продукт в других городах.
+ * @property {boolean} is_favorite - Флаг, указывающий, добавлен ли продукт в избранное.
+ * @property {number} category_id - Уникальный идентификатор категории продукта.
+ * @property {number} stock_price - Цена продукта при наличии акций.
+ * @property {boolean} has_stock - Флаг, указывающий, есть ли акции на продукт.
+ * @property {number} iherb_price - Цена продукта на iHerb.
+ * @property {?number} product_price_rub - Цена продукта в рублях (может быть null).
+ * @property {boolean} is_recommended - Флаг, указывающий, является ли продукт рекомендованным.
+ */
+const { product } = toReactive(props);
+
+const productNameFull = computed(() => {
+  return `${product.product_name} ${product.attributes.join(', ')}`
+})
+
+const hasStock = computed(() => {
+  return product.stock_price !== product.product_price;
+})
+
+const url = computed(() => {
+  return `${product.product_id}-${product.product_name_slug}`
+})
+
 </script>
 
 <style scoped>
@@ -70,10 +100,8 @@ export default {
 
 .product__card--image {
   //aspect-ratio: 168/230;
-  width: 100%;
-  height: 100%;
-  max-width: 168px;
-  max-height: 230px;
+  width: 168px;
+  height: 230px;
 }
 
 @media (max-width: 550px) {

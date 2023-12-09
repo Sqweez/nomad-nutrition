@@ -1,21 +1,26 @@
 <template>
   <div>
-    <nuxt-link tag="button" to="/cart" class="button py-3 px-4 bg-dark flex items-center justify-center gap-x-3 relative">
+    <button @click="_handleClick" class="button py-3 px-4 bg-dark flex items-center justify-center gap-x-3 relative">
       <img src="~/assets/images/icons/cart.svg" alt="Cart icon">
-      <span class="text-white text-xl" v-if="count">
-        {{ count }}
+      <span class="text-white text-xl" v-if="cartCount">
+        {{ cartCount }}
       </span>
-    </nuxt-link>
+    </button>
   </div>
 </template>
 
-<script>
-export default {
-  data: () => ({
-    count: 23,
-  }),
-  methods: {},
-  computed: {}
+<script setup>
+import {useCartStore} from '~/store/cart.js';
+const cartStore = useCartStore();
+const { cartCount } = storeToRefs(cartStore);
+const { $toast } = useNuxtApp();
+const router = useRouter();
+
+const _handleClick = async () => {
+  if (!cartCount.value) {
+    return $toast.warn('Ваша корзина пуста')
+  }
+  await router.push('/cart');
 }
 </script>
 

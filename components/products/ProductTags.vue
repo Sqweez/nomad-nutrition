@@ -77,7 +77,7 @@ const tags = reactive([
   @apply mt-[25px] lg:mt-[35px];
   @apply flex items-center gap-y-[14px] gap-x-[14px] lg:gap-x-[18px];
   @apply flex-wrap;
-  @apply max-w-xs lg:max-w-full;
+  @apply max-w-xs lg:max-w-md;
 }
 
 .product__tag {

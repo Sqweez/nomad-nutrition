@@ -1,7 +1,7 @@
 <template>
   <InlineLoader v-if="!pageLoaded" />
   <div v-if="pageLoaded">
-    <section id="#catalog" class="relative">
+    <section id="#catalog" class="relative pb-[60px] lg:pb-[100px]">
       <div class="hidden lg:block absolute -top-[350px] right-0">
         <img src="~/assets/images/backgrounds/bg-catalog-smoke.png" alt="">
       </div>
@@ -43,12 +43,12 @@
           <div class="flex-1 px-[11px] lg:px-0 flex flex-col">
             <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
               <ProductCard
-                  v-for="item of 20"
-                  :key="item"
-                  :product="{}"
+                  v-for="item of products"
+                  :key="item.product_id"
+                  :product="item"
               />
             </div>
-            <div class="w-full flex justify-between items-center mt-14">
+            <div v-if="showPagination" class="w-full flex justify-between items-center mt-14">
               <div class="hidden md:block flex-1" />
               <div class="flex-1">
                 <button
@@ -64,7 +64,7 @@
         </div>
       </div>
     </section>
-    <page-wrapper class="container mx-auto py-[60px] lg:py-[100px] relative">
+    <page-wrapper class="container mx-auto pt-[60px] lg:pt-[100px] relative" v-if="false">
       <div class="mt-10 px-4">
         <p class="font-medium text-white text-[32px] uppercase">Для магазинов</p>
         <p class="my-4 text-white text-sm lg:text-xl font-light">
@@ -109,17 +109,21 @@ import PageWrapper from "~/components/wrapper/PageWrapper.vue";
 import {useCommonStore} from '~/store/common.js';
 import {toReactive} from '@vueuse/core';
 import InlineLoader from '~/components/utils/InlineLoader.vue';
+import {useCatalogStore} from '~/store/catalog.js';
 
 const commonStore = useCommonStore();
+const catalogStore = useCatalogStore();
 const { categories } = toReactive(commonStore);
 const pageLoaded = ref(false);
 
 const route = useRoute();
 
-const { $loader } = useNuxtApp()
-
 const filters = reactive(PRODUCT_FILTERS);
 const mobileFiltersShow = ref(false);
+
+const { products, meta, pagination, showPagination } = storeToRefs(useCatalogStore());
+const slug = route.params.slug;
+const type = route.params.type;
 
 const _getBreadCrumbs = () => {
   const breadcrumbs = [
@@ -133,8 +137,6 @@ const _getBreadCrumbs = () => {
     }
   ];
 
-  const slug = route.params.slug;
-  const type = route.params.type;
   let pageName = '';
   for (let i = 0; i < categories.length; i++) {
     if (type === 'category' && categories[i].category_slug === slug) {
@@ -162,16 +164,29 @@ const _getBreadCrumbs = () => {
   return breadcrumbs;
 }
 
-onMounted(() => {
+onMounted(async () => {
   commonStore.$patch({
     commonBreadcrumbs: {
       [route.name]: _getBreadCrumbs(),
     }
   })
-  setTimeout(() => {
-    pageLoaded.value = true;
-  }, 2000)
+  await Promise.all([
+      _getProducts(),
+  ]);
+  pageLoaded.value = true;
 })
+
+const _getProducts = async () => {
+  await catalogStore._getProducts(_getCatalogParams());
+}
+
+const _getCatalogParams = () => {
+  const params = {};
+  if (['category', 'subcategory'].includes(type)) {
+    params[type] = slug.split('-').at(-1);
+  }
+  return params;
+}
 
 onBeforeUnmount(() => {
   commonStore.$patch({

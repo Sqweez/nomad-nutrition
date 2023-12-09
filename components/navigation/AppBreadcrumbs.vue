@@ -28,8 +28,6 @@ const props = defineProps({
   },
 });
 
-console.log(props.breadcrumbs);
-
 </script>
 
 <style scoped>

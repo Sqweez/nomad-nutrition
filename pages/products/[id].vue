@@ -1,6 +1,7 @@
 <template>
   <div>
-    <section id="#product" class="relative pb-[100px] lg:pb-[200px]">
+    <InlineLoader v-if="!pageLoaded" />
+    <section v-else id="#product" class="relative pb-[100px] lg:pb-[200px]">
       <div class="hidden lg:block absolute -top-[350px] right-0 no-interaction">
         <img src="~/assets/images/backgrounds/bg-catalog-smoke.png" alt="">
       </div>
@@ -42,30 +43,30 @@
           </div>
           <div class="product__item">
             <div class="w-full bg-[#0C0C0C] overflow-hidden lg:px-10 h-[320px] lg:h-[636px] lg:max-h-[636px]">
-              <img src="~/assets/images/products/sample-product-big.png" class="w-full h-full object-contain">
+              <img :src="product.product_images" class="w-full h-full object-contain">
             </div>
           </div>
           <div class="product__item">
             <h1 class="product__title line-clamp-2">
-              THERMO RUSH
+              {{ product.product_name }}
             </h1>
             <p class="product__category">
-              Жиросжигатели и термогенетики
+              {{ product.subcategory }}
             </p>
             <!-- PRODUCT TAGS -->
-            <product-tags/>
+            <product-tags />
             <!-- END PRODUCT TAGS -->
             <p class="product__price">
-              12.990 тг
+              {{ product.stock_price }} тг
             </p>
             <p class="product__type">
-              60 капсул
+              {{ product.attributes.join(', ') }}
             </p>
             <!-- PRODUCT ACTIONS -->
             <div class="actions__wrapper">
               <div class="action__item cursor-pointer">
                 <span>
-                  60 капсул
+                  {{ selectedSku.attribute }}
                 </span>
               </div>
               <div class="action__item flex items-center">
@@ -92,58 +93,7 @@
           <h3>
             Описание
           </h3>
-          <p>
-            ThermoRush - один из самых крутых по составу термогеников для жиросжигания, результат которого клиент
-            почувствует уже после 5 дня приема. Ускоряет метаболизм, нормализует обмен веществ. Подавляет чувство голода
-            и поддерживает нормальную работу центральной нервной системы. Предотвращает отложение жиров на животе и
-            боках, а также выводит из организма шлаки и токсины.
-
-            Главной задачей ThermoRush бренда Nomad Nutrition является ускорение метаболизма, которое ведет к
-            стремительному сжиганию жиров за счет усиления термогенеза. Помните, что ускорение метаболизма влечет за
-            собой подъем работоспособности и рост силовых показателей, а увеличение энергетических резервов и силового
-            потенциала позволяет вам повышать интенсивность тренировочного процесса.
-
-            Жиросжигатель идеально подходит для стимуляции организма во время динамических нагрузок, направленных на
-            повышение интенсивности для прироста мышечной массы и сжигания жира.
-
-            -Ускорение сжигания жиров
-            -Устранение задержки воды
-            -Антикатаболическое действие, которое защитит мышцы
-          </p>
-
-          <h4>
-            Активное вещество (2 капсулы):
-          </h4>
-          <p>
-            ThermoRush - один из самых крутых по составу термогеников для жиросжигания, результат которого клиент
-            почувствует уже после 5 дня приема. Ускоряет метаболизм, нормализует обмен веществ. Подавляет чувство голода
-            и поддерживает нормальную работу центральной нервной системы. Предотвращает отложение жиров на животе и
-            боках, а также выводит из организма шлаки и токсины.
-
-            Главной задачей ThermoRush бренда Nomad Nutrition является ускорение метаболизма, которое ведет к
-            стремительному сжиганию жиров за счет усиления термогенеза. Помните, что ускорение метаболизма влечет за
-            собой подъем работоспособности и рост силовых показателей, а увеличение энергетических резервов и силового
-            потенциала позволяет вам повышать интенсивность тренировочного процесса.
-
-            Жиросжигатель идеально подходит для стимуляции организма во время динамических нагрузок, направленных на
-            повышение интенсивности для прироста мышечной массы и сжигания жира.
-
-            -Ускорение сжигания жиров
-            -Устранение задержки воды
-            -Антикатаболическое действие, которое защитит мышцы
-          </p>
-          <h4>
-            Состав:
-          </h4>
-          <p>
-            L-холина битартрат (витамин В4), экстракт плодов горького померанца (синефрин 6%), экстракт плодов гарцинии
-            камбоджийской, L-карнитина L-тартрат, кофеин безводный, экстракт корня колеуса форсколии, экстракт коры
-            йохимбе (йохимбин 8%), желатиновая капсула (желатин — загуститель, диоксид титана — краситель),
-            антислеживающий агент — диоксид кремния.
-
-            Рекомендации по применению: взрослым принимать по 1 порции (2 капсулы) 1 раз в день или в соответствии с
-            вашей индивидуальной программой питания или рекомендациями врача.
-          </p>
+          <p v-html="product.product_description" />
         </div>
         <!-- END DESCRIPTION -->
         <!-- BRAND VIDEO -->
@@ -165,17 +115,22 @@
 <script setup>
 import PageWrapper from '~/components/wrapper/PageWrapper.vue';
 import ProductTags from '~/components/products/ProductTags.vue';
-import TransitionCollapse from '~/components/utils/transitions/TransitionCollapse.vue';
 import faq from '~/common/faq.js';
 import FaqComponent from '~/components/FaqComponent.vue';
 import {useCommonStore} from '~/store/common.js';
+import InlineLoader from '~/components/utils/InlineLoader.vue';
+import {useCatalogStore} from '~/store/catalog.js';
 
 const commonStore = useCommonStore();
+const catalogStore = useCatalogStore();
 
 const route = useRoute();
+const pageLoaded = ref(false);
+const { product } = storeToRefs(useCatalogStore());
+let selectedSku = reactive(null);
 
-const _getBreadcrumbs = () => {
-  const breadcrumbs = [
+const _getBreadcrumbs = (name) => {
+  return [
     {
       name: 'Главная',
       path: '/',
@@ -185,31 +140,47 @@ const _getBreadcrumbs = () => {
       path: '/catalog',
     },
     {
-      name: 'Thermo rush',
+      name,
       path: route.path,
     }
   ];
-
-  return breadcrumbs;
 };
 
 onMounted(async () => {
   commonStore.$patch({
     commonBreadcrumbs: {
-      [route.name]: _getBreadcrumbs(),
+      [route.name]: [],
     }
-  })
+  });
+  await Promise.all([
+      getProduct(),
+  ]);
+  commonStore.$patch({
+    commonBreadcrumbs: {
+      [route.name]: _getBreadcrumbs(product.value.product_name),
+    }
+  });
+  pageLoaded.value = true;
 });
+
+const getProduct = async () => {
+  const id = route.params.id.split('-').at(0);
+  return await catalogStore._getProduct(id);
+}
 
 const quantity = ref(1);
 
 const _increment = () => {
-  quantity.value = Math.min(quantity.value + 1, 10);
+  quantity.value = Math.min(quantity.value + 1, selectedSku.quantity);
 };
 
 const _decrement = () => {
   quantity.value = Math.max(quantity.value - 1, 1);
 };
+
+watch(product, (value) => {
+  selectedSku = value.skus.at(0);
+})
 </script>
 
 <style scoped>

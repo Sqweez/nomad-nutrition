@@ -1,7 +1,13 @@
+import {useCartStore} from '~/store/cart.js';
+
 const useApi = () => {
   const config = useRuntimeConfig();
   const token = useCookie('auth:token');
+  const cartStore = useCartStore();
+
+
   const request = async (url, params, method) => {
+    const queryParams = params?.query ? params.query : {};
     const opts = {
       key: url,
       baseURL: config.public.baseURL,
@@ -9,8 +15,8 @@ const useApi = () => {
 
         options.headers = options.headers || {}
 
-        if (token.value) {
-          options.headers['Authorization'] = `Bearer ${token.value}`;
+        if (cartStore.userToken) {
+          options.headers['Authorization'] = `Bearer ${cartStore.userToken}`;
         }
       },
 
@@ -22,7 +28,13 @@ const useApi = () => {
         console.log(response._data.message)
       },
 
-      ...params
+      ...params,
+
+      query: {
+        user_token: cartStore.userToken,
+        ...queryParams
+      },
+
     };
 
     return useFetch(url, {...opts, method});

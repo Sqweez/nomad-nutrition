@@ -1,7 +1,10 @@
 import { defineStore } from "pinia";
+import {useLocalStorage} from '@vueuse/core';
+import {generateUniqueRandomString} from '~/utils/helpers.js';
 
 export const useCartStore = defineStore('cart', {
     state: () => ({
+        userToken: useLocalStorage('NOMAD_USER_TOKEN', generateUniqueRandomString(30)),
         cart: [
             {
                 id: 1,
@@ -43,6 +46,11 @@ export const useCartStore = defineStore('cart', {
         cartStage: 1,
     }),
     getters: {
+        cartCount (state) {
+            return state.cart.reduce((a, c) => {
+                return a + c.count;
+            }, 0)
+        },
         totalAmount (state) {
             return state.cart.reduce((a, c) => {
                 return a + (c.count * c.product_price)

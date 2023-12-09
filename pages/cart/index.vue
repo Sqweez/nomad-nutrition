@@ -7,18 +7,25 @@
       <h1 class="font-medium text-white text-[30px] lg:text-[70px] uppercase py-3 overflow-hidden text-center">
         корзина
       </h1>
-      <div class="mt:[50px] lg:mt-[84px]">
-        <cart-table  />
+      <div v-if="cartCount">
+        <div class="mt:[50px] lg:mt-[84px]">
+          <cart-table  />
+        </div>
+        <div class="mt-[54px] lg:mt-[74px]">
+          <cart-promocode />
+        </div>
+        <div class="mt-[54px] lg:mt-[74px] flex items-center lg:items-end w-full flex-col">
+          <cart-summary>
+            <button class="action__button" @click="$router.push('/checkout')">
+              Оформление заказа
+            </button>
+          </cart-summary>
+        </div>
       </div>
-      <div class="mt-[54px] lg:mt-[74px]">
-        <cart-promocode />
-      </div>
-      <div class="mt-[54px] lg:mt-[74px] flex items-center lg:items-end w-full flex-col">
-        <cart-summary>
-          <button class="action__button" @click="$router.push('/checkout')">
-            Оформление заказа
-          </button>
-        </cart-summary>
+      <div v-else class="py-8 lg:py-14">
+        <p class="text-center text-white text-lg lg:text-2xl">
+          Ваша корзина пуста
+        </p>
       </div>
     </page-wrapper>
   </section>
@@ -32,6 +39,7 @@ import {useCartStore} from "~/store/cart.js";
 
 const cartStore = useCartStore();
 const { $filter } = useNuxtApp();
+const { cartCount } = storeToRefs(cartStore);
 
 definePageMeta({
   name: 'Корзина'
